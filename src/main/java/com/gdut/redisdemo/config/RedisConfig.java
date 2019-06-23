@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
@@ -20,19 +21,18 @@ import java.util.Map;
  */
 @Configuration
 public class RedisConfig {
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-    public RedisConnection redisConnection() {
-        return redisTemplate.getConnectionFactory().getConnection();
+    public RedisConnection redisConnection(RedisConnectionFactory redisConnectionFactory) {
+        return redisConnectionFactory.getConnection();
     }
 
     @Bean
-    public RedisMessageListenerContainer container() {
+    public RedisMessageListenerContainer container(RedisConnectionFactory redisConnectionFactory) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(redisTemplate.getConnectionFactory());
+        container.setConnectionFactory(redisConnectionFactory);
         return container;
     }
 
@@ -42,8 +42,10 @@ public class RedisConfig {
     }
 
     @Bean
-    public CheckKeyExpire checkKeyExpire() {
-        return new CheckKeyExpire(container());
+    public CheckKeyExpire checkKeyExpire(
+            RedisConnectionFactory redisConnectionFactory
+    ) {
+        return new CheckKeyExpire(container(redisConnectionFactory));
     }
 
 }

@@ -25,6 +25,7 @@ public class Producer {
 
 
     public void sendMessage(String topic, MessageVO messageVO) {
+
         //这里给订阅该主题的链接的每个队列进行广播该消息
         pubSubTable.boradCast(topic, messageVO.getMessageId());
         redisTemplate.getConnectionFactory().getConnection().publish(topic.getBytes(CharsetUtil.UTF_8), gson.toJson(messageVO).getBytes());
