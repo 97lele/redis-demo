@@ -21,16 +21,17 @@ import java.util.Map;
  */
 @Configuration
 public class RedisConfig {
-
+@Autowired
+RedisConnectionFactory redisConnectionFactory;
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-    public RedisConnection redisConnection(RedisConnectionFactory redisConnectionFactory) {
+    public RedisConnection redisConnection() {
         return redisConnectionFactory.getConnection();
     }
 
     @Bean
-    public RedisMessageListenerContainer container(RedisConnectionFactory redisConnectionFactory) {
+    public RedisMessageListenerContainer container() {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
         return container;
@@ -43,9 +44,8 @@ public class RedisConfig {
 
     @Bean
     public CheckKeyExpire checkKeyExpire(
-            RedisConnectionFactory redisConnectionFactory
     ) {
-        return new CheckKeyExpire(container(redisConnectionFactory));
+        return new CheckKeyExpire(container());
     }
 
 }

@@ -20,8 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class Comsumer2  implements MessageListener {
-    @Autowired
-    private RedisConnection redisConnection;
+
     @Autowired
     private PubSubTable pubSubTable;
     @Autowired
@@ -32,7 +31,6 @@ public class Comsumer2  implements MessageListener {
 
         pubSubTable.addComsumer(topic,this.getClass().getSimpleName());
         System.out.printf("%s 订阅一个主题%s%n",this.getClass().getSimpleName(),topic);
-        redisConnection.subscribe(this,topic.getBytes());
     }
 
 

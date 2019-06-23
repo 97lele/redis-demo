@@ -31,6 +31,7 @@ public class PubSubTable {
     }
 //删除关系
     public Boolean removeComsumer(String topic, String comsumer) {
+        System.out.println(comsumer+"取消订阅主题"+topic);
         Set<String> comsumerList = pubSubMap.get(topic);
         Boolean b =false;
         if(comsumerList!=null){
