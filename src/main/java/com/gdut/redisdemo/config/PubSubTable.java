@@ -1,11 +1,13 @@
 package com.gdut.redisdemo.config;
 
+import com.gdut.redisdemo.comsumer.Comsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lulu
@@ -14,44 +16,37 @@ import java.util.*;
 
 public class PubSubTable {
     //Map的key为主题，Set里面的元素为队列里面的消费者的队列key，该队列用来检测消息是否被正确接受
-    private Map<String, Set<String>> pubSubMap = new HashMap();
-
+    private Map<String, Set<Integer>> pubSubMap = new HashMap();
     @Autowired
     private StringRedisTemplate redisTemplate;
-//添加关系
-    public Boolean addComsumer(String topic, String comsumer) {
-        Set<String> comsumerList = pubSubMap.get(topic);
 
+    //添加关系
+    public synchronized Boolean addComsumer(String topic, Comsumer comsumer) {
+
+        Set<Integer> comsumerList = pubSubMap.get(topic);
         if (comsumerList == null) {
             comsumerList = new HashSet<>();
         }
-        Boolean b = comsumerList.add(comsumer);
+        Boolean b = comsumerList.add(comsumer.getId());
         pubSubMap.put(topic, comsumerList);
         return b;
     }
-//删除关系
-    public Boolean removeComsumer(String topic, String comsumer) {
-        Set<String> comsumerList = pubSubMap.get(topic);
-        Boolean b =false;
-        if(comsumerList!=null){
-           b= comsumerList.remove(comsumer);
-            pubSubMap.put(topic, comsumerList);
-        }
-        return b;
-    }
+
+
+
+
+
+
 
 
     //广播消息
-    public void boradCast(String topic, String messageId) {
-        if(pubSubMap.get(topic)!=null){
-            for (String comsumer : pubSubMap.get(topic)) {
-                //这里不再次进行入队和设监听键的原因是已经有了（对应滞后消费的情况）
-                if(!redisTemplate.hasKey("fail_"+topic+"_"+comsumer+"_"+messageId)){
-                    //设置监听键
-                    redisTemplate.opsForValue().set(topic+"_"+comsumer + "_" + messageId, messageId);
-                    //为该队列传入消息id，为后面校验使用
-                    redisTemplate.opsForList().leftPush(topic+"_"+comsumer, topic + "_" + messageId);
-                }
+    public synchronized void boradCast(String topic,String content,String messageId) {
+        if (pubSubMap.get(topic) != null) {
+            for (Integer comsumer : pubSubMap.get(topic)) {
+                    //设置监听键,用于消息被消费后过期，如果没有被消费，则作为重传
+                    redisTemplate.opsForValue().set(  "listen_" + comsumer + "_" + messageId, content);
+                    //默认20s没有操作就认为是投递失败
+                    redisTemplate.opsForValue().set("fail_"+comsumer+"_"+messageId,messageId,5, TimeUnit.SECONDS);
             }
         }
 

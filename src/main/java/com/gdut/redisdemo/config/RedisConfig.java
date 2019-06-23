@@ -1,11 +1,13 @@
 package com.gdut.redisdemo.config;
 
 import com.gdut.redisdemo.comsumer.CheckKeyExpire;
+import com.gdut.redisdemo.comsumer.Comsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.redis.connection.ConnectionUtils;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -28,6 +30,8 @@ public class RedisConfig {
     public RedisConnection redisConnection() {
         return redisTemplate.getConnectionFactory().getConnection();
     }
+
+
 
     @Bean
     public RedisMessageListenerContainer container() {
