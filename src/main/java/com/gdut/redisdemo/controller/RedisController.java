@@ -1,5 +1,6 @@
 package com.gdut.redisdemo.controller;
 
+import com.gdut.redisdemo.comsumer.Comsumer;
 import com.gdut.redisdemo.entity.MessageVO;
 import com.gdut.redisdemo.VO.UserVO;
 import com.gdut.redisdemo.comsumer.ComsumerBuilder;
@@ -7,6 +8,9 @@ import com.gdut.redisdemo.producer.Producer;
 import com.gdut.redisdemo.repository.MessageVODao;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +28,8 @@ public class RedisController {
     private Producer producer;
     @Autowired
     private Gson gson;
+    @Autowired
+    private RedisMessageListenerContainer container;
     @Autowired
     private ComsumerBuilder comsumerBuilder;
 @Autowired
@@ -43,7 +49,9 @@ private MessageVODao dao;
 
     @GetMapping("/subTopic")
     public void addChannel(@RequestParam("topic") String topic) {
-        comsumerBuilder.getComsumer().addChannel(topic);
+        Comsumer c=comsumerBuilder.getComsumer();
+        container.addMessageListener(c,new ChannelTopic(topic));
+        c.addChannel(topic);
     }
 
 

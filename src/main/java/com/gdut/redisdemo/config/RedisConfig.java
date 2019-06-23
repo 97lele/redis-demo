@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.redis.connection.ConnectionUtils;
 import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
@@ -23,12 +24,12 @@ import java.util.Map;
 @Configuration
 public class RedisConfig {
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisConnectionFactory redisConnectionFactory;
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public RedisConnection redisConnection() {
-        return redisTemplate.getConnectionFactory().getConnection();
+        return redisConnectionFactory.getConnection();
     }
 
 
@@ -36,7 +37,7 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer container() {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(redisTemplate.getConnectionFactory());
+        container.setConnectionFactory(redisConnectionFactory);
         return container;
     }
 

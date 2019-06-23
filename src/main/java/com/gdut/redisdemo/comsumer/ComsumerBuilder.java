@@ -44,9 +44,7 @@ public class ComsumerBuilder {
         defaultListableBeanFactory.registerBeanDefinition("com.gdut.redisdemo.comsumer.Comsumer", beanDefinitionBuilder.getRawBeanDefinition());
 
         Object bean = SpringContextUtils.getBean(Comsumer.class);
-        Object connection=SpringContextUtils.getBean(RedisConnection.class);
         Comsumer result=(Comsumer)bean;
-        result.setRedisConnection((RedisConnection) connection);
         return result;
     }
 }

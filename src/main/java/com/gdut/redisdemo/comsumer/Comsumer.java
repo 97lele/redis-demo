@@ -36,14 +36,6 @@ public class Comsumer implements MessageListener {
         this.id = index.incrementAndGet();
     }
 
-    public void setRedisConnection(RedisConnection redisConnection) {
-        this.redisConnection = redisConnection;
-    }
-
-    @PreDestroy
-    public void destoryConnection() {
-        this.redisConnection.close();
-    }
 
     @Autowired
     private Gson gson;
@@ -58,7 +50,6 @@ public class Comsumer implements MessageListener {
 
         pubSubTable.addComsumer(topic, this);
         System.out.printf("消费者%s 订阅一个主题%s%n", id, topic);
-        redisConnection.subscribe(this, topic.getBytes());
     }
 
 
@@ -75,8 +66,7 @@ public class Comsumer implements MessageListener {
         //设置消费完成
         redisTemplate.expire("listen_" + name + "_" + messageVO.getMessageId(), 1,TimeUnit.NANOSECONDS);
 
-        //删除监听过期的键
-        redisTemplate.delete("fail_" + name + "_" + messageVO.getMessageId());
+
 
 
     }

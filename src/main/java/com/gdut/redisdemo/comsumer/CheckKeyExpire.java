@@ -13,6 +13,8 @@ import org.springframework.data.redis.listener.KeyspaceEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author lulu
  * @Date 2019/6/22 18:40
@@ -50,11 +52,17 @@ public class CheckKeyExpire extends KeyspaceEventMessageListener {
               dao.save(m);
           }else if(body.startsWith("listen")){
               System.out.printf("消息%s成功消费!%n",body);
-              String value=redisTemplate.opsForValue().get(body);
+              //删除监听过期的键
+              String key= "fail"+body.substring(body.indexOf("_"));
+              String value=redisTemplate.opsForValue().get(key);
               System.out.println(value);
               MessageVO m=gson.fromJson(value,MessageVO.class);
               m.setStatus(1);
               dao.save(m);
+              //设置消费完成
+
+              //删除监听过期的键
+              redisTemplate.delete(key);
           }
         }
     }

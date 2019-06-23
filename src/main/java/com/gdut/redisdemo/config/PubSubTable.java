@@ -46,7 +46,7 @@ public class PubSubTable {
                     //设置监听键,用于消息被消费后过期，如果没有被消费，则作为重传
                     redisTemplate.opsForValue().set(  "listen_" + comsumer + "_" + messageId, content);
                     //默认20s没有操作就认为是投递失败
-                    redisTemplate.opsForValue().set("fail_"+comsumer+"_"+messageId,messageId,5, TimeUnit.SECONDS);
+                    redisTemplate.opsForValue().set("fail_"+comsumer+"_"+messageId,content,10, TimeUnit.SECONDS);
             }
         }
 
